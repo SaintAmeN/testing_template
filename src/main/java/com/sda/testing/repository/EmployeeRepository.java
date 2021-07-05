@@ -9,4 +9,5 @@ import java.util.List;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findBySalaryBetween(Double salaryFrom, Double salaryTo);
     List<Employee> findAllByLevel(EmployeeLevel level);
+    List<Employee> findAllByFirstNameAndLastNameAndSalary(String firstName, String lastName, Double salary);
 }

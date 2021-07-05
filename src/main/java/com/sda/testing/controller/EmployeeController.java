@@ -24,7 +24,7 @@ public class EmployeeController {
     }
 
     //  - listowanie pracowników po poziomach
-    @GetMapping("")
+    @GetMapping("/level")
     public List<Employee> allByLevel(@RequestParam(required = false) EmployeeLevel level) {
         return employeeService.findAllFrom(level);
     }
@@ -36,7 +36,6 @@ public class EmployeeController {
                                        @RequestParam(required = false, defaultValue = ""+Double.MAX_VALUE) Double to) {
         return employeeService.findAllBySalary(from, to);
     }
-
 
     //  - daj podwyżkę
     //    @PatchMapping("/bysalary")
