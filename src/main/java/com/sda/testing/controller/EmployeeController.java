@@ -28,7 +28,7 @@ public class EmployeeController {
     // http://localhost:8080/employee/bysalary?from=80&to=10000
     @GetMapping("/bysalary")
     public List<Employee> findBySalary(@RequestParam(required = false) Double from,
-                                       @RequestParam(required = false) Double to) {
+                                       @RequestParam(required = false, defaultValue = ""+Double.MAX_VALUE) Double to) {
         return employeeService.findAllBySalary(from, to);
     }
 }
