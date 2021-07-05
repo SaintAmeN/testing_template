@@ -40,8 +40,8 @@ public class EmployeeService {
      * @param salaryTo - upper bound of salary. Can be null, then should be ignored.
      * @return list of employees which salary is between #salaryFrom and #salaryTo
      */
-    public List<Employee> findAllBySalary(Double salaryFrom, Double salaryTo){
-        return null;
+    public List<Employee> findAllBySalary(Double salaryFrom, Double salaryTo) {
+        return employeeRepository.findAllBySalaryBetween(salaryFrom, salaryTo);
     }
 
     /**

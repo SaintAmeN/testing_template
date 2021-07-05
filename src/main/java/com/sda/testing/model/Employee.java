@@ -19,7 +19,7 @@ public class Employee {
     private String firstName;
     private String lastName;
 
-    private double salary;
+    private double salary;      // net
 
     private EmployeeLevel level;
 
