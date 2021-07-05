@@ -41,7 +41,7 @@ public class EmployeeService {
      * @return list of employees which salary is between #salaryFrom and #salaryTo
      */
     public List<Employee> findAllBySalary(Double salaryFrom, Double salaryTo) {
-        return employeeRepository.findAllBySalaryBetween(salaryFrom, salaryTo);
+        return employeeRepository.findBySalaryBetween(salaryFrom, salaryTo);
     }
 
     /**
