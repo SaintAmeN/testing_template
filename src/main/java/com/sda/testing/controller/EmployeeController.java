@@ -7,10 +7,12 @@ import com.sda.testing.repository.EmployeeRepository;
 import com.sda.testing.service.CompanyService;
 import com.sda.testing.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/employee")
 @RequiredArgsConstructor
@@ -32,8 +34,9 @@ public class EmployeeController {
     //  - szukanie pracowników po pensjach
     // http://localhost:8080/employee/bysalary?from=80&to=10000
     @GetMapping("/bysalary")
-    public List<Employee> findBySalary(@RequestParam(required = false, defaultValue = "-1") Double from,
-                                       @RequestParam(required = false, defaultValue = ""+Double.MAX_VALUE) Double to) {
+    public List<Employee> findBySalary(@RequestParam(name = "from", required = false, defaultValue = "-1") Double from,
+                                       @RequestParam(name = "to", required = false, defaultValue = ""+Double.MAX_VALUE) Double to) {
+        log.info("Params: " + from + " to: " + to);
         return employeeService.findAllBySalary(from, to);
     }
 
