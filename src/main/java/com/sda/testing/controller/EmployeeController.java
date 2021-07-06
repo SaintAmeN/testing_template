@@ -35,7 +35,7 @@ public class EmployeeController {
     // http://localhost:8080/employee/bysalary?from=80&to=10000
     @GetMapping("/bysalary")
     public List<Employee> findBySalary(@RequestParam(name = "from", required = false, defaultValue = "-1") Double from,
-                                       @RequestParam(name = "to", required = false, defaultValue = ""+Double.MAX_VALUE) Double to) {
+                                       @RequestParam(name = "to", required = false, defaultValue = "" + Double.MAX_VALUE) Double to) {
         log.info("Params: " + from + " to: " + to);
         return employeeService.findAllBySalary(from, to);
     }
@@ -44,7 +44,7 @@ public class EmployeeController {
     //    @PatchMapping("/bysalary")
     @GetMapping("/raise")
     public void giveRaise(@RequestParam() Long employeeId,
-                                       @RequestParam double percentage) throws InvalidOperation {
+                          @RequestParam double percentage) throws InvalidOperation {
         employeeService.giveRaise(employeeId, percentage);
     }
 

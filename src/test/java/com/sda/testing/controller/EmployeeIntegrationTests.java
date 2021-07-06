@@ -14,10 +14,9 @@ import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.util.Arrays;
@@ -142,4 +141,27 @@ public class EmployeeIntegrationTests {
         }
     }
 
+    @Nested
+    class EmployeeIntegrationRaiseTests {
+        private final String BASE_URL = "http://localhost:" + randomServerPort + "/employee";
+        private final Employee EMPLOYEE_TESTED = Employee.builder().firstName("Jan").lastName("Kowalski").salary(500.0).level(EmployeeLevel.WORKER).build();
+
+
+        @BeforeEach
+        void setup() {
+            employeeRepository.deleteAll();
+            employeeRepository.save(EMPLOYEE_TESTED);
+        }
+
+        @Test
+        void giveRaiseWithoutEmployeeIdExpectErrorTest() {
+            final double percentage = 5;
+            Map<String, String> params = new HashMap<String, String>() {{
+                put("percentage", "" + percentage);
+            }};
+            ResponseEntity<?> responseEntity = testRestTemplate.getForEntity(BASE_URL + "/raise?percentage={percentage}", Object.class, params);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        }
+
+    }
 }
