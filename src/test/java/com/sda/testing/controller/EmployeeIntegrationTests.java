@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.yaml.snakeyaml.util.UriEncoder;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -44,6 +45,7 @@ public class EmployeeIntegrationTests {
 
     @Nested
     class EmployeeIntegrationSalaryTests {
+        private final String BASE_URL = "http://localhost:" + randomServerPort + "/employee";
         private final Employee[] EMPLOYEES_INFO = new Employee[]{
                 Employee.builder().firstName("Jan").lastName("Kowalski").salary(500.0).level(EmployeeLevel.WORKER).build(),
                 Employee.builder().firstName("Kasia").lastName("Nowak").salary(2500.0).level(EmployeeLevel.WORKER).build(),
@@ -60,23 +62,84 @@ public class EmployeeIntegrationTests {
         }
 
         @Test
-        void cantGiveRaiseWithoutEmployeeIdTest() {
-            Map<String, String> params = new HashMap<>();
-            params.put("from", "499.0");
-            params.put("to", "501.0");
-            ResponseEntity<Employee[]> responseEntity = testRestTemplate.getForEntity("http://localhost:"+randomServerPort+"/employee/bysalary?from={from}&to={to}", Employee[].class, params);
-            Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-            Employee[] responseBody = responseEntity.getBody();
+        void getEmployeeBySalaryWithRange() {
+            final double rangeFrom = 499.0, rangeTo = 501.0;
+            Map<String, String> params = new HashMap<String, String>() {{
+                put("from", "" + rangeFrom);
+                put("to", "" + rangeTo);
+            }};
+            Employee[] responseBody = requestForEmployees(params, "/bysalary?from={from}&to={to}");
             Assertions.assertNotNull(responseBody);
-            Assertions.assertEquals(1, responseBody.length);
+            assert_resultsAreCorrect(responseBody, rangeFrom, rangeTo);
         }
 
-        // tc 1 - brakuje from, to jest ustalone na 2501.0
-        // tc 2 - brakuje to, jest from 800.0
-        // tc 3 - 2000 - 3000
-        // tc 4 - -200 - -100
+        @Test
+        void getEmployeeBySalaryWithoutFrom() {
+            final double rangeTo = 2501.0;
+            Map<String, String> params = new HashMap<String, String>() {{
+                put("to", "" + rangeTo);
+            }};
+            Employee[] responseBody = requestForEmployees(params, "/bysalary?to={to}");
+            Assertions.assertNotNull(responseBody);
+            assert_resultsAreCorrect(responseBody, null, rangeTo);
+        }
+
+        @Test
+        void getEmployeeBySalaryWithoutTo() {
+            final double rangeFrom = 800.0;
+            Map<String, String> params = new HashMap<String, String>() {{
+                put("from", "" + rangeFrom);
+            }};
+            Employee[] responseBody = requestForEmployees(params, "/bysalary?from={from}");
+            Assertions.assertNotNull(responseBody);
+            assert_resultsAreCorrect(responseBody, rangeFrom, null);
+        }
+
+        @Test
+        void getEmployeeBySalaryWithHighRange() {
+            final double rangeFrom = 2000.0, rangeTo = 3000.0;
+            Map<String, String> params = new HashMap<String, String>() {{
+                put("from", "" + rangeFrom);
+                put("to", "" + rangeTo);
+            }};
+            Employee[] responseBody = requestForEmployees(params, "/bysalary?from={from}&to={to}");
+            Assertions.assertNotNull(responseBody);
+            assert_resultsAreCorrect(responseBody, rangeFrom, null);
+        }
+
+        @Test
+        void getEmployeeBySalaryWithInvalidRange() {
+            final double rangeFrom = -200.0, rangeTo = -100.0;
+            Map<String, String> params = new HashMap<String, String>() {{
+                put("from", "" + rangeFrom);
+                put("to", "" + rangeTo);
+            }};
+            Employee[] responseBody = requestForEmployees(params, "/bysalary?from={from}&to={to}");
+            Assertions.assertNotNull(responseBody);
+            assert_resultsAreCorrect(responseBody, rangeFrom, rangeTo);
+        }
+
+        @Test
+        void getEmployeeBySalaryWithoutParams() {
+            Employee[] responseBody = requestForEmployees(null, "/bysalary?from={from}&to={to}");
+            Assertions.assertNotNull(responseBody);
+            assert_resultsAreCorrect(responseBody, null, null);
+        }
 
 
+        private void assert_resultsAreCorrect(Employee[] responseBody, Double rangeFrom, Double rangeTo) {
+            long result = Arrays.asList(EMPLOYEES_INFO).stream()
+                    .filter(employee -> rangeFrom == null || employee.getSalary() > rangeFrom)
+                    .filter(employee -> rangeTo == null || employee.getSalary() < rangeTo)
+                    .count();
+            Assertions.assertEquals(result, responseBody.length);
+        }
+
+        private Employee[] requestForEmployees(Map<String, String> params, String url) {
+            ResponseEntity<Employee[]> responseEntity = testRestTemplate.getForEntity(BASE_URL + url, Employee[].class, params);
+            Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+            return responseEntity.getBody();
+        }
     }
 
 }
