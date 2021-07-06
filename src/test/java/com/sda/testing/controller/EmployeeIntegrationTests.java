@@ -145,12 +145,17 @@ public class EmployeeIntegrationTests {
     class EmployeeIntegrationRaiseTests {
         private final String BASE_URL = "http://localhost:" + randomServerPort + "/employee";
         private final Employee EMPLOYEE_TESTED = Employee.builder().firstName("Jan").lastName("Kowalski").salary(500.0).level(EmployeeLevel.WORKER).build();
-
+        private Employee databaseObject;
 
         @BeforeEach
         void setup() {
             employeeRepository.deleteAll();
-            employeeRepository.save(EMPLOYEE_TESTED);
+            databaseObject = employeeRepository.save(EMPLOYEE_TESTED);
+        }
+
+        @Test
+        void emplyeeIdIsSetInObject() {
+            Assertions.assertNotNull(databaseObject.getId());
         }
 
         @Test
@@ -162,6 +167,19 @@ public class EmployeeIntegrationTests {
             ResponseEntity<?> responseEntity = testRestTemplate.getForEntity(BASE_URL + "/raise?percentage={percentage}", Object.class, params);
             Assertions.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         }
+
+        // TC 1 - raise percentage 5%
+        // TC 2 - raise percentage 10%
+        // TC 3 - raise percentage 15%
+        // TC 4 - raise percentage -5%
+        // TC 5 - raise percentage 5% non existing ID
+
+        // kroki sprawdzenia:
+        // - weryfikujemy zwracany kod HTTP
+        // - pobieramy liste
+        // - szukamy gościa z danym ID
+        // - sprawdzamy jego salary (czy jest zwiększona odpowiednio)
+
 
     }
 }
